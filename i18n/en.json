@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"PolandballWiki"
+		]
+	},
+	"robotstxt-desc": "Generate robots.txt files on demand"
+}

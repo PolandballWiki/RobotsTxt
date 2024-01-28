@@ -1,0 +1,31 @@
+{
+	"name": "RobotsTxt",
+	"version": "1.0.0",
+	"author": [
+		"PolandballWiki"
+	],
+	"url": "https://github.com/PolandballWiki/RobotsTxt",
+	"descriptionmsg": "robotstxt-desc",
+	"license-name": "GPL-3.0-or-later",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.39.0"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\RobotsTxt\\": "src/"
+	},
+	"config": {
+	},
+	"RestRoutes": [
+		{
+			"path": "/robotstxt/v1/robots.txt",
+			"class": "MediaWiki\\Extension\\RobotsTxt\\RobotsTxtRestApi"
+		}
+	],
+	"MessagesDirs": {
+		"RobotsTxt": [
+			"i18n"
+		]
+	},
+	"manifest_version": 2
+}
