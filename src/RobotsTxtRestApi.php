@@ -17,10 +17,10 @@ class RobotsTxtRestApi extends SimpleHandler {
         $responseFactory = $this->getResponseFactory();
         $response = $responseFactory->create();
 
-
         $robotsTxt = $this->buildRobotsTxt();
         $body = new StringStream($robotsTxt);
 
+        $response->setHeader('Cache-Control', 'public, max-age=86400');
         $response->setHeader('Content-Type', 'text/plain');
         $response->setBody($body);
         return $response;
@@ -34,28 +34,66 @@ class RobotsTxtRestApi extends SimpleHandler {
         $robotsBuilder->addSpacer();
         
         $robotsBuilder = $this->buildBlockedNamespaces($robotsBuilder);
+        $robotsBuilder = $this->buildBlockedParams($robotsBuilder);
+        $robotsBuilder = $this->buildAllowedSpecialPages($robotsBuilder);
+        $robotsBuilder = $this->buildAllowedPaths($robotsBuilder);
         $robotsBuilder = $this->buildThrottlingRules($robotsBuilder);
         $robotsBuilder = $this->buildBlockingRules($robotsBuilder);
         
         return $robotsBuilder->getOutput();
     }
 
-    public function buildBlockedNamespaces (RobotsTxtBuilder $builder) {
+    public function buildBlockedNamespaces(RobotsTxtBuilder $builder) {
         $pathBuilder = new RobotsTxtPathBuilder();
-
         $blockedNamespaces = $pathBuilder->getBlockedNamespaces();
-        $blockedNamespacePaths = $pathBuilder->buildContentPaths($blockedNamespaces, '', ':');
 
         $builder->addUserAgent('*');
-        $builder->addDisallow($blockedNamespacePaths);
+        $builder->addDisallow($blockedNamespaces);
         $builder->addSpacer();
+        return $builder;
+    }
+
+    public function buildBlockedParams(RobotsTxtBuilder $builder) {
+        $pathBuilder = new RobotsTxtPathBuilder();
+        $blockedParams = $pathBuilder->getBlockedParams();
+
+        $builder->addComment('Disallow certain parameters, e.g. old revisions and editing pages');
+        $builder->addUserAgent('*');
+        $builder->addDisallow($blockedParams);
+        $builder->addSpacer();
+
+        return $builder;
+    }
+
+    public function buildAllowedSpecialPages(RobotsTxtBuilder $builder) {
+        $pathBuilder = new RobotsTxtPathBuilder();
+        $allowedSpecialPages = $pathBuilder->getAllowedSpecialPages();
+
+        $builder->addComment('Allow certain special pages');
+        $builder->addUserAgent('*');
+        $builder->addAllow($allowedSpecialPages);
+        $builder->addSpacer();
+
+        return $builder;
+    }
+
+    public function buildAllowedPaths(RobotsTxtBuilder $builder) {
+        $pathBuilder = new RobotsTxtPathBuilder();
+        $allowedPaths = $pathBuilder->getAllowedPaths();
+
+        $builder->addComment('Allow certain paths');
+        $builder->addUserAgent('*');
+        $builder->addAllow($allowedPaths);
+        $builder->addSpacer();
+
         return $builder;
     }
 
     public function buildThrottlingRules(RobotsTxtBuilder $builder) {
         $throttledBots = [
-            'YandexBot' => 2.5,
-            'Bingbot' => 5
+            'YandexBot' => 5,
+            'Bingbot' => 5,
+            'MJ12Bot' => 10
         ];
 
         foreach ($throttledBots as $botName => $delay) {
@@ -69,7 +107,14 @@ class RobotsTxtRestApi extends SimpleHandler {
     }
 
     public function buildBlockingRules(RobotsTxtBuilder $builder) {
-        $blockedBots = ['Bytespider', 'PetalBot', 'MegaIndex'];
+        $blockedBots = [
+            'Barkrowler',
+            'Bytespider',
+            'MegaIndex', 
+            'PetalBot',
+            'SemrushBot',
+            'serpstatbot'
+        ];
 
         foreach ($blockedBots as $bot) {
             $builder->addComment('Block ' . $bot);
